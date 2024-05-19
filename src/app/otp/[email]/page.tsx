@@ -24,10 +24,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import {verifyotp} from '@/services/register';
+import {verifyotp,registerMail} from '@/services/register';
 import { useToast } from "@/components/ui/use-toast";
 import {usePathname,useSearchParams} from 'next/navigation'
-import { useCallback } from "react"
 const formSchema = z.object({
   otp: z.string().min(18).max(18)
 })
@@ -37,9 +36,10 @@ export default function CardWithForm() {
   const navigate=useRouter();
   const { toast } = useToast();
   const pathname = usePathname().slice(5);
-  const searchParams=useSearchParams();
+  const Param=useSearchParams();
   const email = pathname;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isResend, setIsResend] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,17 +48,35 @@ export default function CardWithForm() {
   });
   const createQueryString = React.useCallback(
     (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams(Param.toString())
       params.set(name, value)
  
       return params.toString()
     },
-    [searchParams]
+    [Param]
   )
+  async function Resendotp() {
+    setIsResend(true);
+    try {
+      const result = await registerMail(email);
+      if(result.success===true){
+      toast({
+          title: "Resend Otp",
+          description:`${result.message}`,
+        })
+      }
+    } catch (error) {
+      toast({
+        variant:'destructive',
+        title: "Error",
+        description:`${error}`,
+      })
+    }
+    setIsResend(false);
+  }
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      
       const result = await verifyotp(email,values);
       if(result.success===true){
       toast({
@@ -66,7 +84,7 @@ export default function CardWithForm() {
           description:`${result.message}`,
         })
       }
-      navigate.push(`/signup`+"?"+createQueryString("email",email));
+      navigate.push(`/signup/form`+"?"+createQueryString("email",email));
     } catch (error) {
       toast({
         variant:'destructive',
@@ -99,7 +117,8 @@ export default function CardWithForm() {
             </FormItem>
           )}
         />
-          <p className="float-right mt-5 cursor-pointer text-blue-500 hover:bg-accent p-2 rounded-md">Resend</p>
+          <p className="float-right mt-5 cursor-pointer text-blue-500 hover:bg-accent p-2 rounded-md" onClick={()=>Resendotp()} aria-disabled={isResend}>    {isResend ? (<span className="flex gap-1 justify-center items-center"><Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></span>)   : 'Resend'}
+</p>
     </CardContent>
     <CardFooter>
     <Button type="submit" disabled={isSubmitting}  className="dark:bg-red-500 text-white w-[120px]">

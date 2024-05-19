@@ -1,15 +1,16 @@
 "use client"
-
 import * as React from "react"
-
+import {useRouter} from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import {Inputpassword} from '@/components/ui/password';
+import { useDispatch } from "react-redux";
+import user from "@/lib/Store/features/auth/auth";
 import {
   Form,
   FormControl,
@@ -17,15 +18,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
+import { useToast } from "@/components/ui/use-toast";
+import {userLogin} from "@/services/login";
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
 
 // Schema zod 
 const formSchema = z.object({
   email: z.string().min(1,'Email is required').email("Invalid email"),
-  password:z.string().min(8,"Password must be 8 character long").max(12)
+  password:z
+  .string()
+  .min(8, "Password must be at least 8 characters long")
+  .max(12, "Password must be at most 12 characters long")
+  .regex(passwordRegex, "Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character")
 })
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+  const navigate = useRouter();
+  const dispatch = useDispatch();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,8 +45,27 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       password:"",
     },
   })
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+ 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    try {
+      const result = await userLogin(values);
+      console.log(result);
+      if(result.data.status===200){
+      toast({
+          title: "Login SuccessFully",
+          description:`${result.data.message}`,
+        })
+      }
+      navigate.push(`/`);
+    } catch (error) {
+      toast({
+        variant:'destructive',
+        title: "Error",
+        description:`${error}`,
+      })
+    }
+    setIsSubmitting(false);
   }
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -61,14 +92,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="password" {...field} />
+                <Inputpassword placeholder="password" {...field} suffix={true} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-          <Button type="submit"  className="dark:bg-yellow-500 text-white">
-            Log In with Email
+        <h3 className=" text-blue-500 underline cursor-pointer hover:text-blue-600 flex justify-end" onClick={()=>navigate.push('/reset/forget')}>Forget password?</h3>
+          <Button type="submit"  className="dark:bg-yellow-500 text-white" disabled={isSubmitting}>
+            {isSubmitting ? (<span className="flex gap-1 justify-center items-center">Logging In {" "} <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></span>)   : 'Log In with Email '}
           </Button>
         </div>
         </form>

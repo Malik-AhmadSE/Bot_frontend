@@ -24,17 +24,17 @@ export async function POST(req) {
   try{
     user = await UserModel.findOne({ email });
     if (!user) {
-      return NextResponse.json({error:"Invalid user email"},{status:401})
+      return NextResponse.json({message:"Invalid user email"},{status:401})
     }
     const match = await bcryptjs.compare(password, user.password);
     if (!match) {
-        return NextResponse.json({error:"Invalid user password"},{status:401})
+        return NextResponse.json({message:"Invalid user password"},{status:401})
     }
   } catch (error) {
     return NextResponse.json({ message: "Internal Server Error" },{status:500});
   }
   const token = jwt.sign({ userID: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5d' });
-  const user_DTO = new UserDTO(user);
+  const user_DTO =await new UserDTO(user);
   cookies().set("Token", token);
-  return NextResponse.json({ user: user_DTO, auth: true },{status:200});
+  return NextResponse.json({ message: user_DTO, auth: true },{status:200});
 }

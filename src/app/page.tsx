@@ -10,6 +10,7 @@ import { z } from "zod"
 import FAQ from '../components/Locals/Home/faq';
 import Footer from "../components/Locals/Footer/footer"
 import { NavBar } from "../components/Locals/Navbar/nav";
+import { Icons } from "@/components/ui/icons"
 import  CarouselPlugin  from "../components/Locals/Home/Crousel";
 import {
   Form,
@@ -21,6 +22,8 @@ import {
 } from "@/components/ui/form"
 import Middle from "../components/Locals/Home/Middle"
 import { DrawerDemo } from "../components/Locals/Home/Drawer"
+import {registerMail} from '@/services/register';
+import { useToast } from "@/components/ui/use-toast"
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 // Schema zod 
 const formSchema = z.object({
@@ -28,15 +31,33 @@ const formSchema = z.object({
 })
 export default function Home({ className, ...props }: UserAuthFormProps) {
   const navigate=useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
     },
   })
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    navigate.push(`/signup/${values.email}`);
+ async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    try {
+      const result = await registerMail(values.email);
+      if(result.success===true){
+      toast({
+          title: "OTP Verification",
+          description:`${result.message}`,
+        })
+      }
+      navigate.push(`/otp/${values.email}`);
+    } catch (error) {
+      toast({
+        variant:'destructive',
+        title: "Error",
+        description:`${error}`,
+      })
+    }
+    setIsSubmitting(false);
   }
   return (
     <>
@@ -44,7 +65,7 @@ export default function Home({ className, ...props }: UserAuthFormProps) {
     <div className={cn("w-full h-full gap-20 p-10 flex", className)} {...props}>
       
       <Form  {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className=" w-1/2 flex items-center justify-center">
+      <form onSubmit={form.handleSubmit(onSubmit)} className=" w-1/2 flex pt-16 items-center justify-center">
         <div className="gap-3 grid w-[350px]">
         <h1 className=" text-white text-[60px]">19405050</h1>
       <p className=" text-white text-[30px]">Number of Users <DrawerDemo/></p>
@@ -61,14 +82,14 @@ export default function Home({ className, ...props }: UserAuthFormProps) {
             </FormItem>
           )}
         />
-          <Button type="submit"  className="dark:bg-yellow-500 text-white">
-           Next
+          <Button type="submit"  className="dark:bg-yellow-500 text-white" disabled={isSubmitting}>
+          {isSubmitting ? (<span className="flex gap-1 justify-center items-center">Processing {" "} <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></span>)   : 'Next'}
           </Button>
           <p>Signup to trade like a pro</p>
         </div>
         </form>
       </Form>
-      <div className="w-1/2 h-full flex justify-center">
+      <div className="w-1/2 pt-20 z-0 h-full flex justify-center">
       <CarouselPlugin />
       </div>
     </div>

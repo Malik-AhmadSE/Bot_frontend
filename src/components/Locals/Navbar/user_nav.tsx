@@ -1,8 +1,14 @@
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-  } from "@/components/ui/avatar"
+'use client'
+import {CircleUser,Cloud,
+  LifeBuoy,
+  LogOut,
+  Mail,
+  MessageSquare,
+  PlusCircle,
+  Settings,
+  User,
+  UserPlus,
+} from "lucide-react"
   import { Button } from "@/components/ui/button"
   import {
     DropdownMenu,
@@ -10,54 +16,78 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
-  
-  export function UserNav() {
+import { useRouter } from "next/navigation"
+export function UserNav() {
+  const navigate=useRouter();
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-              <AvatarFallback>SC</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">shadcn</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                m@example.com
-              </p>
-            </div>
-          </DropdownMenuLabel>
+            <DropdownMenuTrigger asChild>
+              <Button  size="icon" className="rounded-full focus-visible:ring-yellow-500">
+                <CircleUser className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel className="flex justify-between"><span className=" text-red-500 font-bold">Subscribed</span><span className="italic ">Premium</span></DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              Profile
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            <DropdownMenuItem className=" cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              <span onClick={()=>navigate.push('/profile')}>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              Billing
-              <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+            <DropdownMenuItem className=" cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              <span onClick={()=>navigate.push('/profile/appearance')}>Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </DropdownMenuItem>
-            <DropdownMenuItem>New Team</DropdownMenuItem>
+          <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className=" cursor-pointer">
+                <UserPlus className="mr-2 h-4 w-4" />
+                <span>Invite users</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem className=" cursor-pointer">
+                    <Mail className="mr-2 h-4 w-4" />
+                    <span>Email</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className=" cursor-pointer">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <span>Message</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className=" cursor-pointer">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <span>More...</span>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            Log out
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          <DropdownMenuItem className=" cursor-pointer">
+            <LifeBuoy className="mr-2 h-4 w-4" />
+            <span>Support</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled className=" cursor-pointer">
+            <Cloud className="mr-2 h-4 w-4" />
+            <span>API</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className=" cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenu>
+
     )
   }
-  
+ 

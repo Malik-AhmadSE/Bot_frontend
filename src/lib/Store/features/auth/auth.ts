@@ -3,7 +3,6 @@ const initialState = {
   _id: "1",
   name: "",
   email: "",
-//   Status:"",
   auth: false,
   dob:"",
   address:"",
@@ -15,14 +14,14 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      const { _id,name,email,dob,auth,address,password} = action.payload;
+      const { message,auth} = action.payload;
+      const { _id,name,email,dob,address} = message;
       state._id = _id;
       state.name = name;
       state.email = email;
       state.auth = auth;
       state.dob=dob;
       state.address=address;
-      state.password=password;
     },
     resetUser: (state) => {
       state._id = "1";

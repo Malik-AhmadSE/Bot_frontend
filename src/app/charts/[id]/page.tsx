@@ -35,6 +35,7 @@ export default function Home() {
   return (
     <>
     <NavBar />
+    <div className="pt-28">
     <div className="w-full h-[50px] flex  gap-4 font-semibold ">
       <h2>{symbol}</h2>
       <div>
@@ -50,7 +51,7 @@ export default function Home() {
         }}
       />
       {isScriptReady && <TVChartContainer {...defaultWidgetProps} />}
-      
+      </div>
     </>
   );
 }

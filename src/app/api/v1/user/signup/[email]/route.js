@@ -8,11 +8,13 @@ import UserDTO from "@/lib/helpers/DTO/userDTO";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 ConnectDB();
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
+
 export async function POST(req) {
   const RegistrationSchema = Joi.object({
       name: Joi.string().min(1).max(15).required(),
       email: Joi.string().email().required(),
-      password: Joi.string().required(),
+      password: Joi.string().regex(passwordRegex).required(),
       confirmPassword: Joi.ref("password"),
       address: Joi.string().min(1).max(20).required(),
       dob: Joi.date().required(),

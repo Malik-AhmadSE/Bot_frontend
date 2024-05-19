@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {useRouter} from 'next/navigation'
+import {useRouter, useSearchParams} from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
@@ -10,13 +10,14 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar } from "@/components/ui/calendar";
+import {Inputpassword} from "@/components/ui/password";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { z } from "zod"
 import {
   Form,
@@ -25,10 +26,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+} from "@/components/ui/form";
+import { Register } from "@/services/register";
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
+}
+
+
+
+// password regex
+
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
 
 // Schema zod 
+
 const formSchema = z.object({
   name: z.string().min(1,'Name is required').max(15),
   email: z.string().min(1,'Email is required').email("Invalid email"),
@@ -36,18 +46,27 @@ const formSchema = z.object({
     required_error: "A date of birth is required.",
   }),
   address:z.string().min(1,'address is required').max(20),
-  password:z.string().min(8,"Password must be 8 character long").max(12),
+  password:z
+  .string()
+  .min(8, "Password must be at least 8 characters long")
+  .max(12, "Password must be at most 12 characters long")
+  .regex(passwordRegex, "Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character"),
   confirmPassword:z.string().min(8,"Password must be 8 character long").max(12)
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"], 
 });
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+export function UserAuthForm({className, ...props}: UserAuthFormProps) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { toast } = useToast();
+  const Param=useSearchParams();
+  const navigate=useRouter();
+  const email:string=Param.get("email") as string;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name:"",
-      email: "",
+      email:email,
       dob:new Date(),
       address:"",  
       password:"",
@@ -55,8 +74,40 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
     },
   })
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+
+  const createQueryString = React.useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(Param.toString())
+      params.set(name, value)
+      return params.toString()
+    },
+    [Param]
+  )
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    try {
+      const result = await Register(email,values);
+      console.log(result);
+      if(result.status===201){
+      toast({
+          title: "Signup Successfully",
+          description:`${result.message}`,
+        })
+      }else if(result.status===409){
+        toast({
+          title: "Email/Username Exist",
+          description:`${result.message}`,
+        })
+      }
+      navigate.push(`/subscription`+"?"+createQueryString("id",result.user._id));
+    } catch (error) {
+      toast({
+        variant:'destructive',
+        title: "Error",
+        description:`${error}`,
+      })
+    }
+    setIsSubmitting(false);
   }
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -83,7 +134,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="example@gmail.com" {...field} />
+                <Input placeholder="example@gmail.com" {...field} disabled={true}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -150,7 +201,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="password" {...field} />
+                <Inputpassword placeholder="password" {...field} suffix={true} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -163,14 +214,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <FormItem>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
-                <Input placeholder="confirm password" {...field} />
+                <Inputpassword placeholder="confirm password" {...field} suffix={true}/>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-          <Button type="submit"  className="dark:bg-yellow-500 text-white">
-           Signup
+          <Button type="submit"  className="dark:bg-yellow-500 text-white" disabled={isSubmitting}>
+          {isSubmitting ? (<span className="flex gap-1 justify-center items-center">Processing {" "} <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></span>)   : 'Signup'}
           </Button>
         </div>
         </form>

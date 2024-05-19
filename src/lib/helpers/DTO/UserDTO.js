@@ -7,5 +7,5 @@ function UserDTO(user) {
     this.address=user.address;
 }
   
-module.exports = UserDTO;
+export default UserDTO;
   

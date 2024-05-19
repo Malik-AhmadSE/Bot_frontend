@@ -182,17 +182,13 @@ ListItem.displayName = "ListItem"
 
 export function NavBar(){
 return (
-  <div className='flex p-8 flex-row items-center gap-16 w-full h-20'>
+  <div className='flex z-10 shadow-sm shadow-yellow-500 p-8 border-b bg-black fixed  flex-row items-center gap-16 w-full h-20'>
       <div className=' w-2/3 pl-10 flex-row flex gap-8'>
           <NavigationMenuDemo />
           </div>
           <div className='-ml-8'>
           <Search />
         </div>
-         {/* <div className='flex flex-row items-center gap-8 float-right'>
-    <UserNav />
-    </div> */}
-          
           </div>
 )
 }

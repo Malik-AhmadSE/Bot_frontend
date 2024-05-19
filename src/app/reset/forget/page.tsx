@@ -8,11 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {useRouter,useSearchParams} from 'next/navigation'
+import {useRouter} from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
-import { Inputpassword } from "@/components/ui/password"
+import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod" 
@@ -24,44 +24,31 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import {resetPassword} from '@/services/reset';
+import {resetMail} from '@/services/reset';
 import { useToast } from "@/components/ui/use-toast";
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
-
 const formSchema = z.object({
-  password:z
-  .string()
-  .min(8, "Password must be at least 8 characters long")
-  .max(12, "Password must be at most 12 characters long")
-  .regex(passwordRegex, "Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character"),
-  confirmPassword:z.string().min(8,"Password must be 8 character long").max(12)
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"], 
-});
+    email: z.string().min(1,'Email is required').email("Invalid email"),
+})
   
 
 export default function CardWithForm() {
   const navigate=useRouter();
   const { toast } = useToast();
-  const Param=useSearchParams();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      password: "",
-      confirmPassword:""
+      email: "",
     },
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const id = Param.get('id');
-      const result = await resetPassword(id,values);
+      const result = await resetMail(values);
       console.log(result);
       if(result.status===200){
        toast({
-          title: "Password Reset",
+          title: "Email Send",
           description:`${result.data.message}`,
         })
         navigate.push(`/login`);
@@ -88,34 +75,22 @@ export default function CardWithForm() {
   }
   return (
     <div className="w-screen h-screen flex justify-center items-center">
-      <Card className="w-[380px] h-[480px] ">
+      <Card className="w-[350px] h-[350px] ">
       <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
     <CardHeader>
-      <CardTitle>New Password</CardTitle>
+      <CardTitle>Password Reset</CardTitle>
+      <CardDescription className=" text-red-500">Please Enter your Email for Password Reset </CardDescription>
     </CardHeader>
     <CardContent>
         <FormField
           control={form.control}
-          name="password"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Inputpassword placeholder="password" {...field} suffix={true}  />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /><br/>
-         <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Inputpassword placeholder="password" {...field} suffix={true}  />
+                <Input placeholder="example@gmail.com" {...field}  />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -123,8 +98,8 @@ export default function CardWithForm() {
         />
     </CardContent>
     <CardFooter>
-    <Button type="submit" disabled={isSubmitting}  className="dark:bg-green-600 text-white w-full">
-    {isSubmitting ? (<span className="flex gap-1 justify-center items-center">Processing {" "} <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></span>)   : 'Set Password'}
+    <Button type="submit" disabled={isSubmitting}  className="dark:bg-green-600 text-white w-[120px]">
+    {isSubmitting ? (<span className="flex gap-1 justify-center items-center">Sending {" "} <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></span>)   : 'Send Email'}
     </Button>
     </CardFooter>
     </form>

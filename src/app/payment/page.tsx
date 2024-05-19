@@ -1,5 +1,9 @@
+'use client'
+import { httpRequest } from "@/lib/helpers/httpRequest/request";
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
+import { useSearchParams } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -20,6 +24,26 @@ import {
 } from "@/components/ui/select"
 
 export default function DemoPaymentMethod() {
+  const Param=useSearchParams();
+    const id=Param.get('id');
+    const title=Param.get('title');
+    const price=Param.get('price');
+    const period=Param.get('period');
+    const handleCheckout = () => {
+     httpRequest.post(`/api/v1/stripe/create-checkout-session`, {
+        price:price,
+        period:period,
+        title:title,
+        Id: id,
+      })
+      .then((response) => {
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
+      })
+      .catch((err) => console.log(err.message));
+      console.log("clicked");
+  };
   return (
     <div className=" w-full h-screen flex justify-center items-center">
       <div className=" w-1/3">
@@ -68,7 +92,7 @@ export default function DemoPaymentMethod() {
               Paypal
             </Label>
           </div>
-          <div>
+          <div onClick={()=>handleCheckout()}>
             <RadioGroupItem value="apple" id="apple" className="peer sr-only focus-visible:bg-yellow-500" />
             <Label
               htmlFor="apple"
