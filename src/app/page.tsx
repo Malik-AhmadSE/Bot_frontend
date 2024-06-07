@@ -43,13 +43,19 @@ export default function Home({ className, ...props }: UserAuthFormProps) {
     setIsSubmitting(true);
     try {
       const result = await registerMail(values.email);
-      if(result.success===true){
-      toast({
-          title: "OTP Verification",
-          description:`${result.message}`,
-        })
-      }
-      navigate.push(`/otp/${values.email}`);
+      if(result.status===200){
+        toast({
+            title: "OTP Verification",
+            description:`${result.data.message}`,
+          })
+          navigate.push(`/otp/${values.email}`);  
+        }else if(result.status===409){
+          toast({
+            variant:'destructive',
+            title: "Email Exist",
+            description:`${result.data.message}`,
+          })
+        }
     } catch (error) {
       toast({
         variant:'destructive',

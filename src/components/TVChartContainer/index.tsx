@@ -2,7 +2,6 @@ import styles from "./index.module.css";
 import { useEffect, useRef } from "react";
 import { ChartingLibraryWidgetOptions, LanguageCode, ResolutionString, widget} from "../../../public/static/charting_library";
 
-
 export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) => {
 	const chartContainerRef =
 		useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
@@ -43,6 +42,17 @@ export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) =
 		const tvWidget = new widget(widgetOptions);
 		
 		tvWidget.onChartReady(() => {
+			tvWidget.activeChart().createStudy('MACD', false, false, { in_0: 14, in_1: 30, in_3: 'close', in_2: 9 });		  
+			tvWidget.activeChart().createStudy('Moving Average Exponential', false, false, { length: 26 });
+			tvWidget.activeChart().createShape(
+				  { time: 1521763200, channel: "low" },
+				  { shape: "arrow_up", text: "Buy" }
+				);
+			  tvWidget.activeChart().createShape(
+				  { time: 1520899200, channel: "high" },
+				  { shape: "arrow_down", text: "Sell" }
+				);
+				
 			tvWidget.headerReady().then(() => {
 				const button = tvWidget.createButton();
 				button.setAttribute("title", "Click to show a notification popup");
@@ -60,12 +70,13 @@ export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) =
 				button.innerHTML = "Check API";
 				
 			});
-  
+			
 		});
 
 		return () => {
 			tvWidget.remove();
 		};
+		
 	}, [props]);
 	return (
 		<>

@@ -59,10 +59,10 @@ export default function CardWithForm() {
     setIsResend(true);
     try {
       const result = await registerMail(email);
-      if(result.success===true){
+      if(result.status===200){
       toast({
           title: "Resend Otp",
-          description:`${result.message}`,
+          description:`${result.data.message}`,
         })
       }
     } catch (error) {
@@ -78,10 +78,10 @@ export default function CardWithForm() {
     setIsSubmitting(true);
     try {
       const result = await verifyotp(email,values);
-      if(result.success===true){
+      if(result.status===200){
       toast({
           title: "OTP Verification",
-          description:`${result.message}`,
+          description:`${result.data.message}`,
         })
       }
       navigate.push(`/signup/form`+"?"+createQueryString("email",email));

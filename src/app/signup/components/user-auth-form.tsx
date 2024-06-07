@@ -38,13 +38,20 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsSubmitting(true);
     try {
       const result = await registerMail(values.email);
-      if(result.success===true){
+      if(result.status===200){
       toast({
           title: "OTP Verification",
-          description:`${result.message}`,
+          description:`${result.data.message}`,
+        })
+        navigate.push(`/otp/${values.email}`);  
+      }else if(result.status===409){
+        toast({
+          variant:'destructive',
+          title: "Email Exist",
+          description:`${result.data.message}`,
         })
       }
-      navigate.push(`/otp/${values.email}`);
+      
     } catch (error) {
       toast({
         variant:'destructive',

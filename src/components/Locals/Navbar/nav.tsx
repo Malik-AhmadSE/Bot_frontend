@@ -7,7 +7,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-import { Search } from './search';
+import { SearchBar } from './search';
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/ui/icons"
 import {
@@ -187,7 +187,7 @@ return (
           <NavigationMenuDemo />
           </div>
           <div className='-ml-8'>
-          <Search />
+          <SearchBar />
         </div>
           </div>
 )

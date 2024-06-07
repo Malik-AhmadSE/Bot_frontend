@@ -38,10 +38,10 @@ export default function Home() {
     <div className="pt-28">
     <div className="w-full h-[50px] flex  gap-4 font-semibold ">
       <h2>{symbol}</h2>
-      <div>
+      {/* <div>
         <h3>Price</h3>
         <h4>63908</h4>
-      </div>
+      </div> */}
     </div>
       <Script
         src="/static/datafeeds/udf/dist/bundle.js"

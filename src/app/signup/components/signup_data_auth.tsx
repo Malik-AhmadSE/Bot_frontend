@@ -87,19 +87,20 @@ export function UserAuthForm({className, ...props}: UserAuthFormProps) {
     setIsSubmitting(true);
     try {
       const result = await Register(email,values);
-      console.log(result);
+      console.log(result.data.message._id);
       if(result.status===201){
       toast({
           title: "Signup Successfully",
-          description:`${result.message}`,
+          description:`Signup SuccessFully ${result.data.message.email}`,
         })
+      navigate.push(`/subscription`+"?"+createQueryString("id",result.data.message._id)); 
       }else if(result.status===409){
         toast({
           title: "Email/Username Exist",
-          description:`${result.message}`,
+          description:`${result.data.message}`,
         })
       }
-      navigate.push(`/subscription`+"?"+createQueryString("id",result.user._id));
+      
     } catch (error) {
       toast({
         variant:'destructive',

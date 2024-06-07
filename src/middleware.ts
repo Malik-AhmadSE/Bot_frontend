@@ -10,9 +10,9 @@ export async function middleware(request: NextRequest) {
       try {
         const secret = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
         const { payload } = await jwtVerify(token, secret);
+        console.log(payload);
         return NextResponse.redirect(new URL(`/charts/${payload.userID}`, request.url));
       } catch (error) {
-        console.error('JWT verification failed:', error);
         return NextResponse.redirect(new URL('/login', request.url));
       }
     }
@@ -26,5 +26,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/login','/signup','/reset/:path*', '/payment/:path*', '/otp/:path*', '/subscription/:path*', '/charts/:path*', '/api/v1/stripe/:path*'],
+  matcher: ['/login','/signup','/reset/:path*', '/payment/:path*', '/subscription/:path*', '/charts/:path*', '/api/v1/stripe/:path*'],
 };
